@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/robot/collision/ball"
+	"github.com/goinggo/robot/collision/ball"
 )
 
 func inti() {
