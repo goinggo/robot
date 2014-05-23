@@ -13,21 +13,20 @@ func inti() {
 }
 
 func main() {
-	//blue := [3]uint8{0, 0, 255}
-	green := [3]uint8{51, 102, 0}
-
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(1)
 
-	//go func() {
-	//	var robot ball.Robot
-	//	robot.Run(&waitGroup, "Bill", "/dev/tty.Sphero-Bill-RN-SPP", blue)
-	//}()
-
 	go func() {
+		blue := [3]uint8{0, 0, 255}
 		var robot ball.Robot
-		robot.Run(&waitGroup, "Erick", "/dev/tty.Sphero-Erick-RN-SPP", green)
+		robot.Run(&waitGroup, "Bill", "/dev/tty.Sphero-Bill-RN-SPP", blue)
 	}()
+
+	//go func() {
+	//	green := [3]uint8{51, 102, 0}
+	//	var robot ball.Robot
+	//	robot.Run(&waitGroup, "Erick", "/dev/tty.Sphero-Erick-RN-SPP", green)
+	//}()
 
 	waitGroup.Wait()
 }
