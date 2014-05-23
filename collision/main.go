@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"sync"
 
 	"github.com/goinggo/robot/collision/ball"
 )
@@ -15,16 +16,17 @@ func main() {
 	blue := [3]uint8{0, 0, 255}
 	green := [3]uint8{51, 102, 0}
 
-	if len(os.Args) == 2 {
+	var waitGroup sync.WaitGroup
+
+	go func() {
 		var robot ball.Robot
+		robot.Run(&waitGroup, "Bill", "/dev/tty.Sphero-Bill-RN-SPP", blue)
+	}()
 
-		color := green
-		if os.Args[1] == "Erick" {
-			color = blue
-		}
+	go func() {
+		var robot ball.Robot
+		robot.Run(&waitGroup, "Erick", "/dev/tty.Sphero-Erick-RN-SPP", green)
+	}()
 
-		robot.Run(os.Args[1], "/dev/tty.Sphero-"+os.Args[1]+"-RN-SPP", color)
-	}
-
-	log.Println(len(os.Args))
+	waitGroup.Wait()
 }

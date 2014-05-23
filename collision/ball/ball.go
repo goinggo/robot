@@ -2,7 +2,7 @@ package ball
 
 import (
 	"log"
-	"os"
+	"sync"
 	"time"
 
 	"github.com/hybridgroup/gobot"
@@ -15,7 +15,7 @@ type Robot struct {
 }
 
 // Run has the gaming logic
-func (b *Robot) Run(name string, port string, color [3]uint8) {
+func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [3]uint8) {
 	// Set up the adapter.
 	sa := new(gobotSphero.SpheroAdaptor)
 	sa.Name = "Sphero"
@@ -94,7 +94,7 @@ func (b *Robot) Run(name string, port string, color [3]uint8) {
 		time.Sleep(1 * time.Second)
 
 		log.Println("DONE")
-		os.Exit(0)
+		waitGroup.Done()
 	}
 
 	// Control structure for the code and events.
