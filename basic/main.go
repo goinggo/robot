@@ -1,52 +1,51 @@
 package main
 
 import (
-	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot-sphero"
-
 	"os"
 	"time"
+
+	"github.com/hybridgroup/gobot"
+	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
 func main() {
+	gbot := gobot.NewGobot()
 
-	spheroAdaptor := new(gobotSphero.SpheroAdaptor)
-	spheroAdaptor.Name = "Sphero"
-	spheroAdaptor.Port = "/dev/tty.Sphero-Ball1-RN-SPP"
-
-	sphero := gobotSphero.NewSphero(spheroAdaptor)
-	sphero.Name = "Sphero"
+	adaptor := sphero.NewSpheroAdaptor("sphero", "/dev/tty.Sphero-PRW-RN-SPP")
+	driver := sphero.NewSpheroDriver(adaptor, "sphero")
 
 	work := func() {
-		sphero.Stop()
-		sphero.SetRGB(0, 255, 255) // Blue
+		driver.Stop()
+		driver.SetRGB(0, 255, 255) // Blue
 		time.Sleep(5 * time.Second)
 
-		sphero.SetRGB(255, 140, 0) // Orange
+		driver.SetRGB(255, 140, 0) // Orange
 		time.Sleep(1 * time.Second)
-		sphero.Roll(100, 0)
+		driver.Roll(100, 0)
 		time.Sleep(2 * time.Second)
-		sphero.Stop()
+		driver.Stop()
 		time.Sleep(2 * time.Second)
 
-		sphero.SetRGB(148, 0, 211) // Purple
+		driver.SetRGB(148, 0, 211) // Purple
 		time.Sleep(1 * time.Second)
-		sphero.Roll(100, 180)
+		driver.Roll(100, 180)
 		time.Sleep(2 * time.Second)
-		sphero.Stop()
+		driver.Stop()
 		time.Sleep(2 * time.Second)
 
-		sphero.SetRGB(0, 255, 255) // Blue
+		driver.SetRGB(0, 255, 255) // Blue
 
-		sphero.Stop()
+		driver.Stop()
 		os.Exit(1)
 	}
 
-	robot := gobot.Robot{
-		Connections: []gobot.Connection{spheroAdaptor},
-		Devices:     []gobot.Device{sphero},
-		Work:        work,
-	}
+	robot := gobot.NewRobot(
+		"sphero",
+		[]gobot.Connection{adaptor},
+		[]gobot.Device{driver},
+		work,
+	)
 
-	robot.Start()
+	gbot.AddRobot(robot)
+	gbot.Start()
 }
