@@ -1,3 +1,7 @@
+// Scan: hcitool scan
+// Pair: bluez-simple-agent hci0 ADDRESS
+// Conn: bluez-test-serial -i hci0 68:86:E7:05:D5:02 - YELLOW (NEW)
+// Conn: bluez-test-serial -i hci0 00:06:66:4F:3D:A6 - BLUE (OLD)
 package main
 
 import (
