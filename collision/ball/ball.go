@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hybridgroup/gobot"
-	"github.com/hybridgroup/gobot-sphero"
+	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
 // Robot tracks collisions.
@@ -16,14 +16,13 @@ type Robot struct {
 
 // Run has the gaming logic.
 func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [3]uint8) {
+	gbot := gobot.NewGobot()
+
 	// Set up the adapter.
-	sa := new(gobotSphero.SpheroAdaptor)
-	sa.Name = "Sphero"
-	sa.Port = port
+	sa := sphero.NewSpheroAdaptor(name, port)
 
 	// New sphero driver.
-	sd := gobotSphero.NewSphero(sa)
-	sd.Name = "Sphero" + name
+	sd := sphero.NewSpheroDriver(sa, name)
 	sd.SetStabilization(true)
 
 	// Channel to talk to the device.
@@ -32,7 +31,7 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 	// Work function is provided to gorobot to control the robot.
 	work := func() {
 		// Tell the robot to run the pause logic on collisions.
-		gobot.On(sd.Events["Collision"], func(data interface{}) {
+		gobot.On(sd.Event("collision"), func(data interface{}) {
 			b.Outs++
 			log.Println(name, "Collision Detected - Pausing", b.Outs)
 
@@ -44,7 +43,7 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 		})
 
 		// Shutdown the game after a minute.
-		gobot.After("60s", func() {
+		gobot.After(60*time.Second, func() {
 			log.Println("GAME OVER")
 			talk <- "shutdown"
 		})
@@ -97,12 +96,13 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 		waitGroup.Done()
 	}
 
-	// Control structure for the code and events.
-	robot := gobot.Robot{
-		Connections: []gobot.Connection{sa},
-		Devices:     []gobot.Device{sd},
-		Work:        work,
-	}
+	robot := gobot.NewRobot(
+		"sphero",
+		[]gobot.Connection{sa},
+		[]gobot.Device{sd},
+		work,
+	)
 
-	robot.Start()
+	gbot.AddRobot(robot)
+	gbot.Start()
 }

@@ -19,7 +19,7 @@ func main() {
 	go func() {
 		blue := [3]uint8{0, 0, 255}
 		var robot ball.Robot
-		robot.Run(&waitGroup, "Bill", "/dev/tty.Sphero-Bill-RN-SPP", blue)
+		robot.Run(&waitGroup, "sphero", "/dev/rfcomm0", blue)
 	}()
 
 	//go func() {
