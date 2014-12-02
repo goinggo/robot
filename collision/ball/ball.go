@@ -9,21 +9,33 @@ import (
 	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
+type Collision struct {
+	First  []uint8
+	Second uint8
+	Third  uint8
+}
+
 // Robot tracks collisions.
 type Robot struct {
-	Outs int
+	WG    *sync.WaitGroup
+	Name  string
+	Port  string
+	Color [3]uint8
+	Coll  Collision
+	Outs  int
 }
 
 // Run has the gaming logic.
-func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [3]uint8) {
+func (r *Robot) Run() {
 	gbot := gobot.NewGobot()
 
 	// Set up the adapter.
-	sa := sphero.NewSpheroAdaptor(name, port)
+	sa := sphero.NewSpheroAdaptor(r.Name, r.Port)
 
 	// New sphero driver.
-	sd := sphero.NewSpheroDriver(sa, name)
+	sd := sphero.NewSpheroDriver(sa, r.Name)
 	sd.SetStabilization(true)
+	sd.ConfigureCollisionDetection(r.Coll.First, r.Coll.Second, r.Coll.Third)
 
 	// Channel to talk to the device.
 	talk := make(chan string)
@@ -32,10 +44,10 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 	work := func() {
 		// Tell the robot to run the pause logic on collisions.
 		gobot.On(sd.Event("collision"), func(data interface{}) {
-			b.Outs++
-			log.Println(name, "Collision Detected - Pausing", b.Outs)
+			r.Outs++
+			log.Println(r.Name, "Collision Detected - Pausing", r.Outs)
 
-			if b.Outs == 3 {
+			if r.Outs == 3 {
 				talk <- "shutdown"
 			} else {
 				talk <- "pause"
@@ -43,14 +55,14 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 		})
 
 		// Shutdown the game after a minute.
-		gobot.After(60*time.Second, func() {
+		gobot.After(300*time.Second, func() {
 			log.Println("GAME OVER")
 			talk <- "shutdown"
 		})
 
 		// Starting up the robot.
-		log.Println(name, "Starting Robot", color)
-		sd.SetRGB(color[0], color[1], color[2])
+		log.Println(r.Name, "Starting Robot")
+		sd.SetRGB(r.Color[0], r.Color[1], r.Color[2])
 
 	shutdown:
 		for {
@@ -59,10 +71,10 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 				switch command {
 				// Pause command stops the robot and turns the color red.
 				case "pause":
-					log.Println(name, "Pausing Robot")
+					//log.Println(name, "Pausing Robot")
 					sd.Stop()
 					sd.SetRGB(220, 20, 60) // Red
-					time.Sleep(1 * time.Second)
+					time.Sleep(5 * time.Second)
 
 				// Shutdown command breaks from the work loop.
 				case "shutdown":
@@ -70,30 +82,27 @@ func (b *Robot) Run(waitGroup *sync.WaitGroup, name string, port string, color [
 				}
 
 			// Every second choose a random direction and roll fast.
-			case <-time.After(2 * time.Second):
+			case <-time.After(500 * time.Millisecond):
 				direction := uint16(gobot.Rand(360))
-				log.Println(name, "Chaning Direction", direction)
-				sd.SetRGB(color[0], color[1], color[2])
-				sd.Roll(255, direction)
+				log.Println(r.Name, "Chaning Direction", direction)
+				sd.SetRGB(r.Color[0], r.Color[1], r.Color[2])
+				sd.Roll(150, direction)
 			}
 		}
 
 		// On shutdown stop the robot and change the color to blue.
-		log.Println(name, "Shutting Down Robot")
+		log.Println(r.Name, "Shutting Down Robot")
 		sd.Stop()
 
 		for i := 0; i < 3; i++ {
 			sd.SetRGB(220, 20, 60) // Red
-			time.Sleep(1 * time.Second)
-			sd.SetRGB(255, 255, 255)
+			time.Sleep(2 * time.Second)
+			sd.SetRGB(r.Color[0], r.Color[1], r.Color[2])
 			time.Sleep(1 * time.Second)
 		}
 
-		sd.SetRGB(220, 20, 60) // Red
-		time.Sleep(1 * time.Second)
-
-		log.Println("DONE")
-		waitGroup.Done()
+		log.Println(r.Name, "DONE Robot")
+		r.WG.Done()
 	}
 
 	robot := gobot.NewRobot(
