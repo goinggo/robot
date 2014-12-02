@@ -78,7 +78,7 @@ func (r *Robot) Run() {
 			// Every second choose a random direction and roll fast.
 			case <-time.After(500 * time.Millisecond):
 				direction := uint16(gobot.Rand(360))
-				log.Println(r.Name, "Chaning Direction", direction)
+				//log.Println(r.Name, "Chaning Direction", direction)
 				sd.SetRGB(r.Color[0], r.Color[1], r.Color[2])
 				sd.Roll(150, direction)
 			}
