@@ -9,19 +9,13 @@ import (
 	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
-type Collision struct {
-	First  []uint8
-	Second uint8
-	Third  uint8
-}
-
 // Robot tracks collisions.
 type Robot struct {
 	WG    *sync.WaitGroup
 	Name  string
 	Port  string
 	Color [3]uint8
-	Coll  Collision
+	CC    sphero.CollisionConfig
 	Outs  int
 }
 
@@ -35,7 +29,7 @@ func (r *Robot) Run() {
 	// New sphero driver.
 	sd := sphero.NewSpheroDriver(sa, r.Name)
 	sd.SetStabilization(true)
-	sd.ConfigureCollisionDetection(r.Coll.First, r.Coll.Second, r.Coll.Third)
+	sd.ConfigureCollisionDetection(r.CC)
 
 	// Channel to talk to the device.
 	talk := make(chan string)
