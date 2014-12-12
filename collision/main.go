@@ -21,7 +21,7 @@ func main() {
 		robot := ball.Robot{
 			WG:    &wg,
 			Name:  "BLUE-SP2-68:86:E7:05:D5:02",
-			Port:  "/dev/rfcomm1",
+			Port:  "/dev/rfcomm0",
 			Color: [3]uint8{0, 0, 255},
 			CC: sphero.CollisionConfig{
 				Method: 0x01,
@@ -39,7 +39,7 @@ func main() {
 		robot := ball.Robot{
 			WG:    &wg,
 			Name:  "GREEN-SP1-00:06:66:4F:3D:A6",
-			Port:  "/dev/rfcomm2",
+			Port:  "/dev/rfcomm1",
 			Color: [3]uint8{51, 102, 0},
 			CC: sphero.CollisionConfig{
 				Method: 0x01,
