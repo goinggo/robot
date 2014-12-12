@@ -12,7 +12,6 @@ import (
 	"github.com/hybridgroup/gobot/platforms/sphero"
 )
 
-// Robot tracks collisions.
 type Robot struct {
 	Name  string
 	Port  string
