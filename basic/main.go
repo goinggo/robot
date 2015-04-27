@@ -4,6 +4,8 @@
 // gort bluetooth connect 68:86:E7:05:D5:02
 // Conn: bluez-test-serial -i hci0 00:06:66:4F:3D:A6 - BLUE (OLD)
 // gort bluetooth connect 00:06:66:4F:3D:A6
+//
+// ls -l /dev/tty.Sphero*
 package main
 
 import (
@@ -15,7 +17,7 @@ import (
 
 func main() {
 	g := gobot.NewGobot()
-	a := sphero.NewSpheroAdaptor("sphero", "/dev/rfcomm0")
+	a := sphero.NewSpheroAdaptor("sphero", "/dev/tty.Sphero-PRW-AMP-SPP")
 	d := sphero.NewSpheroDriver(a, "sphero")
 
 	work := func() {
